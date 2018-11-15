@@ -17,7 +17,8 @@ end;
 
 var 
 input : String;
-fehlereingabe, i, userId : integer;
+start, ziel, totaleEntfernung : integer;
+fehlereingabe, i, j, userId : integer;
 benutzerliste : array[0..4] of user;
 hotelliste : array[0..4] of hotel;
 correct : boolean;
@@ -33,26 +34,24 @@ begin
 		benutzerliste[i].password := '1234';
 	end;
 	
-	hotelliste[0].name := 'A';	
-	hotelliste[0].entfernung := 70;
-	hotelliste[1].name := 'B';	
-	hotelliste[1].entfernung := 110;
-	hotelliste[2].name := 'C';	
-	hotelliste[2].entfernung := 54;
-	hotelliste[3].name := 'D';	
-	hotelliste[3].entfernung := 118;
-	hotelliste[4].name := 'E';	
+	hotelliste[0].name := 'Krone';	
+	hotelliste[0].entfernung := 11;
+	hotelliste[1].name := 'Adler';	
+	hotelliste[1].entfernung := 5;
+	hotelliste[2].name := 'Sonne';	
+	hotelliste[2].entfernung := 11;
+	hotelliste[3].name := 'Central';	
+	hotelliste[3].entfernung := 5;
+	hotelliste[4].name := 'Hirsch';	
 	hotelliste[4].entfernung := 0;
 	
 	correct := false;
 end;
 
-procedure showHotels();
+procedure showHotelliste();
 begin
-	for i:= low(hotelliste) to high(hotelliste) do 
-	begin
-		write('--', hotelliste[i].name, '--', hotelliste[i].entfernung, 'km');
-	end;
+	for i:= low(hotelliste) to high(hotelliste) do write('--', hotelliste[i].name, '--', hotelliste[i].entfernung, 'km');
+	
 	writeln();
 end;
 
@@ -101,26 +100,46 @@ begin
 	
 	writeln('Erfolgreich angemeldet');
 	
-	showHotels();
+	showHotelliste();
 	
-	write('Hotel eingaben: ');
+	write('aktuelles Hotel eingaben: ');
+	readln(input);
+
+	for i := 0 to 4 do
+	begin
+		if (hotelliste[i].name = input) then
+			start := i;
+	end;
+	
+	write('Zielhotel eingaben: ');
 	readln(input);
 	
-	for i := 0 to 3 do
+	for i := 0 to 4 do
 	begin
-		if (hotelliste[i].name = input) then 
-		begin
-			write('Geschwindigkeit (in km/h): ');
-			readln(input);
-			geschwindigkeit := strtofloat(input);
-			
-			
-			writeln('Entfernung zu Hotel ', hotelliste[i+1].name , ': ', hotelliste[i].entfernung, 'km');
-			
-			dauer := hotelliste[i].entfernung / geschwindigkeit;	//t = s / v
-			
-			writeln('Dauer: ', dauer, 'h');			
-		end;
+		if (hotelliste[i].name = input) then
+			ziel := i;
 	end;
+
+	write('Geschwindigkeit (in km/h): ');
+	readln(input);
+	geschwindigkeit := strtofloat(input);
+		
+	totaleEntfernung := 0;
+	
+	if (start < ziel) then 
+	begin 
+		for j := start to ziel - 1 do totaleEntfernung := totaleEntfernung + hotelliste[j].entfernung;
+	end
+	else 
+	begin
+		for j := ziel to start - 1 do totaleEntfernung := totaleEntfernung + hotelliste[j].entfernung;
+	end;
+	
+	writeln('Entfernung zu Hotel ', hotelliste[ziel].name , ': ', totaleEntfernung, 'km');
+			
+	dauer := totaleEntfernung / geschwindigkeit;	//t = s / v
+			
+	writeln('Dauer: ', dauer, 'h');	
+	
 end.
 
