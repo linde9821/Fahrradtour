@@ -1,8 +1,8 @@
-Program Fahrradtoud;
+Program Fahrradtour;
 {$R+}
 {$Q+}
-
-uses sysutils;
+{$I+}
+uses sysutils, crt;
 
 type user = record 
 	name : string;
@@ -15,25 +15,44 @@ type hotel = record
 	entfernung : integer;	//Entfernung zum nächsten Hotel
 end;
 
+type allUserData = ARRAY [0..99] OF user;
+type allHotelData = ARRAY [0..5] of hotel;
+
 var 
 input : String;
 start, ziel, totaleEntfernung : integer;
 fehlereingabe, i, j, userId : integer;
-benutzerliste : array[0..4] of user;
-hotelliste : array[0..4] of hotel;
 correct : boolean;
 geschwindigkeit, dauer : real;
+
+userAmount : integer;
+
+benutzerliste: allUserData;
+Datei: FILE OF allUserData;
+
+hotelliste : allHotelData;
+Datei2 : FILE OF allHotelData;
 
 procedure iniAll();
 begin
 	fehlereingabe := 0;
+	userAmount := 1;
+
+	//benutzerliste[0].name := 'admin';
+	//benutzerliste[0].password := 'root';
+
+
+	Assign(Datei, 'daten.dat');{$I-}
+	Reset(Datei);
+	Read(Datei, benutzerliste);
+	Close(Datei);
+
+	Assign(Datei2, 'daten2.dat');
+	Reset(Datei2);
+	Read(Datei2, hotelliste);
+	Close(Datei2);{$I+}
 	
-	for i := 0 to 4 do 
-	begin
-		benutzerliste[i].name := 'user' + IntToStr(i);
-		benutzerliste[i].password := '1234';
-	end;
-	
+	{
 	hotelliste[0].name := 'Krone';	
 	hotelliste[0].entfernung := 11;
 	hotelliste[1].name := 'Adler';	
@@ -44,8 +63,28 @@ begin
 	hotelliste[3].entfernung := 5;
 	hotelliste[4].name := 'Hirsch';	
 	hotelliste[4].entfernung := 0;
+	}
 	
 	correct := false;
+end;
+
+procedure registUser();
+begin
+	
+
+end;
+
+procedure exit();
+begin
+	Assign(Datei, 'daten.dat');{$I-}
+	ReWrite(Datei);
+	Write(Datei, benutzerliste);
+	Close(Datei);
+
+	Assign(Datei2, 'daten2.dat');
+	ReWrite(Datei2);
+	Write(Datei2, hotelliste);
+	Close(Datei2);{$I+}
 end;
 
 procedure showHotelliste();
@@ -74,7 +113,7 @@ begin
 			end;
 				
 			i := i+1;
-		until (i > 4);
+		until (i > userAmount);
 	until(correct);
 	
 	correct := false;
@@ -140,6 +179,8 @@ begin
 	dauer := totaleEntfernung / geschwindigkeit;	//t = s / v
 			
 	writeln('Dauer: ', dauer, 'h');	
+	
+	exit();
 	
 end.
 
