@@ -1,186 +1,312 @@
 Program Fahrradtour;
-{$R+}
-{$Q+}
-{$I+}
+{$R+} {$Q+} {$I+}
+
 uses sysutils, crt;
 
+//user record
 type user = record 
 	name : string;
 	password : string;
 end;
 
+//hotrl record
 type hotel = record
 	name : string;			//Name des Hotels
 	id : integer;
-	entfernung : integer;	//Entfernung zum nächsten Hotel
+	distance : integer;	//distance zum nächsten Hotel
 end;
 
-type allUserData = ARRAY [0..99] OF user;
-type allHotelData = ARRAY [0..5] of hotel;
+type allUserData = ARRAY [0..99] of user;
+type allHotelData = ARRAY [0..4] of hotel;
 
 var 
-input : String;
-start, ziel, totaleEntfernung : integer;
-fehlereingabe, i, j, userId : integer;
-correct : boolean;
-geschwindigkeit, dauer : real;
+input : String;								//std input string
+start, goal, totaleDistance : integer;
+errorInput, i, j, userId : integer;
+speed, travelTime : real;
 
 userAmount : integer;
 
-benutzerliste: allUserData;
-Datei: FILE OF allUserData;
+userList: allUserData;
+file1: FILE OF allUserData;
 
-hotelliste : allHotelData;
-Datei2 : FILE OF allHotelData;
+hotelListe : allHotelData;
+file2 : FILE OF allHotelData;
 
+//inis all vars and loads all data from files
 procedure iniAll();
 begin
-	fehlereingabe := 0;
-	userAmount := 1;
+	errorInput := 0;
+	userAmount := 2;
 
-	//benutzerliste[0].name := 'admin';
-	//benutzerliste[0].password := 'root';
+	{$I-}
+	Assign(file1, 'daten.dat');
+	Reset(file1);
+	Read(file1, userList);
+	Close(file1);
 
-
-	Assign(Datei, 'daten.dat');{$I-}
-	Reset(Datei);
-	Read(Datei, benutzerliste);
-	Close(Datei);
-
-	Assign(Datei2, 'daten2.dat');
-	Reset(Datei2);
-	Read(Datei2, hotelliste);
-	Close(Datei2);{$I+}
+	Assign(file2, 'daten2.dat');
+	Reset(file2);
+	Read(file2, hotelListe);
+	Close(file2);
+	{$I+}
 	
-	{
-	hotelliste[0].name := 'Krone';	
-	hotelliste[0].entfernung := 11;
-	hotelliste[1].name := 'Adler';	
-	hotelliste[1].entfernung := 5;
-	hotelliste[2].name := 'Sonne';	
-	hotelliste[2].entfernung := 11;
-	hotelliste[3].name := 'Central';	
-	hotelliste[3].entfernung := 5;
-	hotelliste[4].name := 'Hirsch';	
-	hotelliste[4].entfernung := 0;
-	}
-	
-	correct := false;
+	userList[0].name := 'admin';
+	userList[0].password := 'root';
 end;
 
+//registes user (would need to be reworked if list would be implimented)
 procedure registUser();
+var newName, newPassword : string;
 begin
+	writeln('Neuer Benutzername: ');
+	readln(newName);
 	
+	writeln('Benutzerpassword: ');
+	readln(newPassword);
+
+	userAmount := userAmount + 1;
+	userList[userAmount - 1].name := newName;
+	userList[userAmount - 1].password := newPassword;
+end;
+
+//not workings (needs list to provide this functionality)
+procedure delAUser();
+var username : string;
+i : integer;
+wasCorrected : boolean;
+begin
+	wasCorrected := false;
+	writeln('Welcher benutzer soll gelöscht werden?');
+	
+	readln(username);
+	
+	for i := 1 to high(userList) do begin 
+		if username = userList[i].name then 
+		begin 
+			wasCorrected := true;
+			//userList[i].name := nil;
+			//userList[1].password := nil;
+		end;
+	end;
+	
+	if (wasCorrected <> true) then writeln('Kein User mit diesem Namen');
 
 end;
 
+//not workings (needs list to provide this functionality)
+procedure delAllUsers();
+var i : integer;
+begin
+	for i:= 1 to userAmount do
+	begin
+		userList[i].name := '';
+		userList[i].password := '';
+	end;
+end;
+
+//closes program and saves all data
 procedure exit();
 begin
-	Assign(Datei, 'daten.dat');{$I-}
-	ReWrite(Datei);
-	Write(Datei, benutzerliste);
-	Close(Datei);
+	{$I-}
+	Assign(file1, 'daten.dat');
+	ReWrite(file1);
+	Write(file1, userList);
+	Close(file1);
 
-	Assign(Datei2, 'daten2.dat');
-	ReWrite(Datei2);
-	Write(Datei2, hotelliste);
-	Close(Datei2);{$I+}
+	Assign(file2, 'daten2.dat');
+	ReWrite(file2);
+	Write(file2, hotelListe);
+	Close(file2);
+	{$I+}
 end;
 
-procedure showHotelliste();
+procedure showhotelListe();
 begin
-	for i:= low(hotelliste) to high(hotelliste) do write('--', hotelliste[i].name, '--', hotelliste[i].entfernung, 'km');
+	for i:= low(hotelListe) to high(hotelListe) do write('--', hotelListe[i].name, '--', hotelListe[i].distance, 'km');
 	
 	writeln();
 end;
 
+function calcTravelTime(totaleDistance, speed : real):real;
 begin
-	//Initialisierungen
-	iniAll();
+	calcTravelTime := totaleDistance / speed;	//t = s / v
+end;
+
+function calcKM():integer;
+var total : integer;
+begin
+	total := 0;
 	
-	//Anmeldung
+	if (start < goal) then 
+	begin 
+		for j := start to goal - 1 do total := total + hotelListe[j].distance;
+	end
+	else 
+	begin
+		for j := goal to start - 1 do total := total + hotelListe[j].distance;
+	end;
+		
+	calcKM := total;
+end;
+
+function login():boolean;
+var input : string;
+begin
 	//Prüfen des benutzernamens
+	
+	login := false;
+	
 	repeat 
 		write('Name: ');
 		readln(input);
 		i := 0;
 		repeat 
-			if (benutzerliste[i].name = input) then 
+			if (userList[i].name = input) then 
 			begin
-				correct := true;
+				login := true;
 				userId := i;
 				break;
 			end;
 				
 			i := i+1;
 		until (i > userAmount);
-	until(correct);
+	until(login);
 	
-	correct := false;
+	login := false;
 
 	//Prüfen des Passwords
 	repeat 
 		write('Password: ');
 		readln(input);
 		
-		if (benutzerliste[userId].password = input) then correct := true
+		if (userList[userId].password = input) then login := true
 		else
 		begin
 			writeln('Falsches Password');
-			fehlereingabe := fehlereingabe + 1;
+			errorInput := errorInput + 1;
 			
-			if (fehlereingabe > 3) then 
+			if (errorInput > 3) then 
 			begin
 				writeln('Zu viele Fehlerhafte eingaben');
-				exit;
+				login := false;
 			end;
 		end;
-	until(correct);
+	until(login);
 	
 	writeln('Erfolgreich angemeldet');
-	
-	showHotelliste();
-	
-	write('aktuelles Hotel eingaben: ');
-	readln(input);
+end;
 
-	for i := 0 to 4 do
-	begin
-		if (hotelliste[i].name = input) then
-			start := i;
-	end;
-	
-	write('Zielhotel eingaben: ');
-	readln(input);
-	
-	for i := 0 to 4 do
-	begin
-		if (hotelliste[i].name = input) then
-			ziel := i;
-	end;
+//returns hotelindex if valid, otherwise -1
+function getHotel():integer;
+var correct : boolean;
+var index : integer;
+begin	
+	correct := false;
 
-	write('Geschwindigkeit (in km/h): ');
-	readln(input);
-	geschwindigkeit := strtofloat(input);
+	repeat
+		readln(input);
+	
+		for i := 0 to 4 do
+		begin
+			if (hotelListe[i].name = input) then 
+			begin
+				index := i;
+				correct := true;
+			end;
+		end;
 		
-	totaleEntfernung := 0;
+		if (correct = false) then 
+		begin
+			writeln('Hotel nicht gefunden');
+			getHotel := -1;
+		end;
+	until (correct);
 	
-	if (start < ziel) then 
-	begin 
-		for j := start to ziel - 1 do totaleEntfernung := totaleEntfernung + hotelliste[j].entfernung;
-	end
-	else 
+	getHotel := index;
+end;
+
+//allowes to input hotels inbetween the start and goal hotel
+//bug with "if (inbetweenIndex is inbeetweenHotels)"
+procedure inbeetweenHotels();
+var input : string;
+	inbetweenIndex : integer;
+begin
+	if (((goal - start) > 1) or (((start - goal)) > 1)) then
 	begin
-		for j := ziel to start - 1 do totaleEntfernung := totaleEntfernung + hotelliste[j].entfernung;
+		writeln('Gibt es zwischenziele? (J)a / (N)ein: ');
+		readln(input);
+		
+		if ((input = 'J') or (Input = 'j')) then 
+		begin 
+			writeln('Zwischenziel: ');
+			inbetweenIndex := getHotel();
+			
+			if (((inbetweenIndex > start) and (inbetweenIndex < goal)) or ((inbetweenIndex < start) and (inbetweenIndex > goal))) then writeln ('Dieses Ziel liegt nicht zwischen den Hotels.');
+		end; 
 	end;
+
+end;
+
+//program startpoint
+begin
+	//Initialisierungen
+	iniAll();
 	
-	writeln('Entfernung zu Hotel ', hotelliste[ziel].name , ': ', totaleEntfernung, 'km');
-			
-	dauer := totaleEntfernung / geschwindigkeit;	//t = s / v
-			
-	writeln('Dauer: ', dauer, 'h');	
+	//Anmeldung
+	login();
+	
+	writeln('H = Hotels  R = User registrieren');
+	readln(input);
+	
+	if ((input = 'h') or (input = 'H')) then
+	begin
+		showhotelListe();
+
+		writeln('Starthotel');
+		start := getHotel();
+		
+		writeln('Zielhotel');
+		goal := getHotel();
+		until(goal <> -1);
+		
+		inbeetweenHotels();
+
+		write('speed (in km/h): ');
+		readln(input);
+		speed := strtofloat(input);
+		
+		totaleDistance := calcKM();
+	
+		writeln('Distanz zu Hotel ', hotelListe[goal].name , ': ', totaleDistance, 'km');
+				
+		travelTime := calcTravelTime(totaleDistance, speed);
+				
+		writeln('travelTime: ', travelTime, 'h');	
+		
+		
+	end
+	else if ((input = 'r') or (input = 'R')) then
+	begin
+		registUser();
+	end	
+	else if ((input = 'd') or (input = 'D')) then
+	begin
+		
+	end
+	else if ((input = 'dau') or (input = 'DAU')) then
+	begin
+		//delAllUsers();
+	end
+	else if ((input = 'du') or (input = 'DU')) then 
+	begin 
+		//delAUser();
+	end
+	else if ((input = 'h') or (input = 'help')) then
+	begin
+		
+	end;
 	
 	exit();
 	
 end.
-
