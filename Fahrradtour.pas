@@ -23,7 +23,7 @@ var
 input : String;								//std input string
 start, goal, totaleDistance : integer;
 errorInput, i, j, userId : integer;
-speed, travelTime : real;
+speed : real;
 
 userAmount : integer;
 
@@ -128,24 +128,32 @@ begin
 	writeln();
 end;
 
-function calcTravelTime(totaleDistance, speed : real):real;
+function calcTravelTime(totaleDistance, speed : real):String;
+var 
+	temp : real;
 begin
-	calcTravelTime := totaleDistance / speed;	//t = s / v
+	temp := totaleDistance / speed;	//t = s / v
+	
+	temp := temp * 60;
+	
+	calcTravelTime := FloatToStr(temp);
 end;
 
 function calcKM():integer;
 var total : integer;
+	temp : integer;
 begin
 	total := 0;
 	
-	if (start < goal) then 
+	//if true swap start and goal (makes no difference to the output)
+	if (start > goal) then 
 	begin 
-		for j := start to goal - 1 do total := total + hotelListe[j].distance;
-	end
-	else 
-	begin
-		for j := goal to start - 1 do total := total + hotelListe[j].distance;
+		temp := goal;
+		goal := start;
+		start := temp;
 	end;
+	
+	for j := start to goal - 1 do total := total + hotelListe[j].distance;
 		
 	calcKM := total;
 end;
@@ -154,7 +162,6 @@ function login():boolean;
 var input : string;
 begin
 	//Prüfen des benutzernamens
-	
 	login := false;
 	
 	repeat 
@@ -232,7 +239,7 @@ procedure inbeetweenHotels();
 var input : string;
 	inbetweenIndex : integer;
 begin
-	if (((goal - start) > 1) or (((start - goal)) > 1)) then
+	if abs(goal - start) > 1 then
 	begin
 		writeln('Gibt es zwischenziele? (J)a / (N)ein: ');
 		readln(input);
@@ -242,7 +249,7 @@ begin
 			writeln('Zwischenziel: ');
 			inbetweenIndex := getHotel();
 			
-			if (((inbetweenIndex > start) and (inbetweenIndex < goal)) or ((inbetweenIndex < start) and (inbetweenIndex > goal))) then writeln ('Dieses Ziel liegt nicht zwischen den Hotels.');
+			if (start > inbetweenIndex) or (goal < inbetweenIndex) then writeln('Hotel liegt nicht dazwischen');
 		end; 
 	end;
 
@@ -268,7 +275,6 @@ begin
 		
 		writeln('Zielhotel');
 		goal := getHotel();
-		until(goal <> -1);
 		
 		inbeetweenHotels();
 
@@ -278,11 +284,9 @@ begin
 		
 		totaleDistance := calcKM();
 	
-		writeln('Distanz zu Hotel ', hotelListe[goal].name , ': ', totaleDistance, 'km');
+		writeln('Die Distanz zu Hotel ', hotelListe[goal].name , 'betraegt ', totaleDistance, ' km');
 				
-		travelTime := calcTravelTime(totaleDistance, speed);
-				
-		writeln('travelTime: ', travelTime, 'h');	
+		writeln('Reisezeit: ', calcTravelTime(totaleDistance, speed), ' Minuten');	
 		
 		
 	end
