@@ -17,8 +17,9 @@ type hotel = record
 end;
 
 type allUserData = ARRAY [0..99] of user;
-type allHotelData = ARRAY [0..4] of hotel;
+//type allHotelData = ARRAY [0..4] of hotel;
 
+//TODO: Variablen lokalisieren 
 var 
 input : String;								//std input string
 start, goal, totaleDistance : integer;
@@ -45,10 +46,12 @@ begin
 	Read(file1, userList);
 	Close(file1);
 
+	{
 	Assign(file2, 'daten2.dat');
 	Reset(file2);
 	Read(file2, hotelListe);
 	Close(file2);
+	}
 	{$I+}
 	
 	userList[0].name := 'admin';
@@ -113,15 +116,18 @@ begin
 	ReWrite(file1);
 	Write(file1, userList);
 	Close(file1);
-
+	{
 	Assign(file2, 'daten2.dat');
 	ReWrite(file2);
 	Write(file2, hotelListe);
 	Close(file2);
+	}
 	{$I+}
 end;
 
 procedure showhotelListe();
+var 
+	h : hotel;
 begin
 	for i:= low(hotelListe) to high(hotelListe) do write('--', hotelListe[i].name, '--', hotelListe[i].distance, 'km');
 	
@@ -153,7 +159,15 @@ begin
 		start := temp;
 	end;
 	
-	for j := start to goal - 1 do total := total + hotelListe[j].distance;
+	
+	write('Start ');
+	
+	for j := start to goal - 1 do 
+	begin
+		total := total + hotelListe[j].distance;
+		
+		writeln
+	end;
 		
 	calcKM := total;
 end;
