@@ -1,5 +1,0 @@
-#ignores all .exe 
-*.exe
-
-#ignores all .pas
-*.pas
