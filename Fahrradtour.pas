@@ -4,27 +4,25 @@ Program Fahrradtour;
 uses sysutils, crt;
 
 //user record
-type user = record 
+type user = record
 	name : string;
 	password : string;
 end;
 
-//hotrl record
+//hotel record
 type hotel = record
-	name : string;			//Name des Hotels
+	name : string;			
 	id : integer;
-	distance : integer;	//distance zum nächsten Hotel
+	distance : integer;		//distance zum nächsten Hotel
 end;
 
 type HotelFileType = File of Hotel;
 type UserFileType = File of User;
 
-//TODO: Variablen lokalisieren 
-var 
-input : String;								//std input string
-start, goal, totaleDistance : integer;
+//TODO: Variablen lokalisieren
+var
+start, goal: integer;
 errorInput, i, j, userId : integer;
-speed : real;
 userFile : UserFileType;
 hotelFile : HotelFileType;
 
@@ -35,72 +33,34 @@ hotelArray : array of hotel;
 procedure iniAll();
 begin
 	errorInput := 0;
-	
+
 	Assign(userFile, 'user.dat');
 	Reset(userFile);
-	
-	setLength(userArray, 2);
+
+	setLength(userArray, 1);
 
 	userArray[0].name := 'admin';
 	userArray[0].password := 'root';
-	
-	repeat 
-		read(userFile, userArray[Length(userArray) - 1]);
+
+	while not eof(userFile) do
+	begin
 		setLength(userArray, Length(userArray) + 1);
-	until eof(userFile);
-	
+		read(userFile, userArray[Length(userArray) - 1]);
+	end;
+
 	close(userFile);
-	
+
 	Assign(hotelFile, 'hotel.dat');
 	reset(hotelFile);
-	
+
 	setLength(hotelArray, 1);
 
-	repeat 
+	while not eof(hotelFile) do
+	begin
 		read(hotelFile, hotelArray[Length(hotelArray) - 1]);
 		setLength(hotelArray, Length(hotelArray) + 1);
-		writeln('got hotel');
-	until eof(hotelFile);
-	
-	close(hotelFile);
-end;
+	end;
 
-//deactiovated
-procedure create();
-var 
-i : integer;
-begin
-	Assign(userFile, 'user.dat');
-	ReWrite(userFile);
-	
-	setLength(userArray, 2);
-	
-	userArray[0].name := 'admin';
-	userArray[0].password := 'root';
-
-
-	write(userFile, userArray[0]);
-	
-	close(userFile);
-	
-	Assign(hotelFile, 'hotel.dat');
-	ReWrite(hotelFile);
-	
-	setLength(hotelArray, 5);
-	
-	hotelArray[0].name := 'Krone';	
-	hotelArray[0].distance := 11;
-	hotelArray[1].name := 'Adler';	
-	hotelArray[1].distance := 5;
-	hotelArray[2].name := 'Sonne';	
-	hotelArray[2].distance := 11;
-	hotelArray[3].name := 'Central';	
-	hotelArray[3].distance := 5;
-	hotelArray[4].name := 'Hirsch';	
-	hotelArray[4].distance := 0;
-	
-	for i := 0 to 4 do write(hotelFile, hotelArray[i]);
-	
 	close(hotelFile);
 end;
 
@@ -110,13 +70,13 @@ var newName, newPassword : string;
 begin
 	writeln('Neuer Benutzername: ');
 	readln(newName);
-	
+
 	writeln('Benutzerpassword: ');
 	readln(newPassword);
 
 	userArray[Length(userArray) - 1].name := newName;
 	userArray[Length(userArray) - 1].password := newPassword;
-	
+
 	SetLength(userArray, Length(userArray) + 1);
 end;
 
@@ -128,18 +88,18 @@ wasCorrected : boolean;
 begin
 	wasCorrected := false;
 	writeln('Welcher benutzer soll gelöscht werden?');
-	
+
 	readln(username);
-	
-	for i := 1 to high(userArray) do begin 
-		if username = userArray[i].name then 
-		begin 
+
+	for i := 1 to high(userArray) do begin
+		if username = userArray[i].name then
+		begin
 			wasCorrected := true;
 			//userList[i].name := nil;
 			//userList[1].password := nil;
 		end;
 	end;
-	
+
 	if (wasCorrected <> true) then writeln('Kein User mit diesem Namen');
 
 end;
@@ -161,35 +121,35 @@ var i : integer;
 begin
 	Assign(userFile, 'user.dat');
 	Rewrite(userFile);
-	
+
 	for i := low(userArray) + 1 to high(userArray) do write(userFile, userArray[i]);
-	
+
 	close(userFile);
-	
+
 	Assign(hotelFile, 'hotel.dat');
 	Rewrite(hotelFile);
-	
+
 	for i := low(hotelArray) to high(hotelArray) do write(hotelFile, hotelArray[i]);
-	
+
 	close(hotelFile);
 end;
 
-procedure showhotelListe();
+procedure showHotelListe();
 begin
 	for i := low(hotelArray) to high(hotelArray) do write('--', hotelArray[i].name, '--', hotelArray[i].distance, 'km');
-	
+
 	writeln();
 end;
 
 function calcTravelTime(totaleDistance, speed : real):String;
-var 
+var
 	temp : real;
 begin
 	if (speed <= 0) then speed := 1;
 
 	temp := totaleDistance / speed;	//t = s / v
 	temp := temp * 60;
-	
+
 	calcTravelTime := FloatToStr(temp);
 end;
 
@@ -198,25 +158,25 @@ var total : integer;
 	temp : integer;
 begin
 	total := 0;
-	
+
 	//if true swap start and goal (makes no difference to the output)
-	if (start > goal) then 
-	begin 
+	if (start > goal) then
+	begin
 		temp := goal;
 		goal := start;
 		start := temp;
 	end;
-	
-	
+
+
 	write('Start ');
-	
-	for j := start to goal - 1 do 
+
+	for j := start to goal - 1 do
 	begin
 		total := total + hotelArray[j].distance;
-		
+
 		writeln
 	end;
-		
+
 	calcKM := total;
 end;
 
@@ -225,73 +185,76 @@ var input : string;
 begin
 	//Prüfen des benutzernamens
 	login := false;
-	
-	repeat 
+
+	repeat
 		write('Name: ');
 		readln(input);
 		i := 0;
-		repeat 
-			if (userArray[i].name = input) then 
+		repeat
+			if (userArray[i].name = input) then
 			begin
+				writeln('Brack at index: ' , i);
 				login := true;
 				userId := i;
 				break;
 			end;
-				
+
 			i := i+1;
 		until (i >= Length(userArray));
 	until(login);
-	
+
 	login := false;
 
 	//Prüfen des Passwords
-	repeat 
+	repeat
 		write('Password: ');
 		readln(input);
-		
+
 		if (userArray[userId].password = input) then login := true
 		else
 		begin
 			writeln('Falsches Password');
 			errorInput := errorInput + 1;
-			
-			if (errorInput > 3) then 
+
+			if (errorInput > 3) then
 			begin
 				writeln('Zu viele Fehlerhafte eingaben');
 				login := false;
 			end;
 		end;
 	until(login);
-	
+
 	writeln('Erfolgreich angemeldet');
 end;
 
 //returns hotelindex if valid, otherwise -1
 function getHotel():integer;
-var correct : boolean;
-var index : integer;
-begin	
+var
+	correct : boolean;
+	index : integer;
+	input : string;
+begin
 	correct := false;
 
 	repeat
 		readln(input);
-	
+
 		for i := 0 to 4 do
 		begin
-			if (hotelArray[i].name = input) then 
+			if (hotelArray[i].name = input) then
 			begin
 				index := i;
 				correct := true;
 			end;
 		end;
-		
-		if (correct = false) then 
+
+		if (correct = false) then
 		begin
 			writeln('Hotel nicht gefunden');
 			getHotel := -1;
 		end;
 	until (correct);
-	
+
 	getHotel := index;
 end;
 
@@ -305,81 +268,126 @@ begin
 	begin
 		writeln('Gibt es zwischenziele? (J)a / (N)ein: ');
 		readln(input);
-		
-		if ((input = 'J') or (Input = 'j')) then 
-		begin 
+
+		if ((input = 'J') or (Input = 'j')) then
+		begin
 			writeln('Zwischenziel: ');
 			inbetweenIndex := getHotel();
-			
+
 			if (start > inbetweenIndex) or (goal < inbetweenIndex) then writeln('Hotel liegt nicht dazwischen');
-		end; 
+		end;
 	end;
 
 end;
 
-//program startpoint
+procedure registHotel();
+var
+	name, input : string;
+	correct : boolean;
+	index : array[0..1] of integer;
+	dif : integer;
 begin
-	//create();
+	writeln('Hotelnname: ');
+	readln(name);
 
-	
-	//Initialisierungen
-	iniAll();
-	
-	
-	//Anmeldung
-	login();
-	
-	
-	
-	writeln('H = Hotels  R = User registrieren');
+	writeln('Wo liegt das Hotel?');
+
+	showHotelListe();
+
+	writeln('Liegt das neue Hotel innerhalb der Liste oder Außerhalb der Liste? (J)a/(N)ein)');
 	readln(input);
-	
-	if ((input = 'h') or (input = 'H')) then
+
+	correct := false;
+
+	if input = 'J' then
 	begin
+		writeln('Innerhalb');
+		writeln('Geben Sie die Namen der Hotels an zwischen denen sich das neue Hotel befindet');
+		repeat
+			writeln('Hotel 1: ');
+			index[0] := getHotel();
+
+			writeln('Hotel 2: ');
+			index[1] := getHotel();
+
+			dif := index[1] - index[0];
+
+			if (dif = 1) then correct := true;
+
+		until correct;
+	end
+	else
+	begin
+		writeln('Außerhalb');
+
+	end;
+end;
+
+procedure reise();
+var
+totaleDistance : integer;
+speed : real;
+input : String;	
+begin
 		showhotelListe();
 
 		writeln('Starthotel');
 		start := getHotel();
-		
+
 		writeln('Zielhotel');
 		goal := getHotel();
-		
+
 		inbeetweenHotels();
 
-		write('speed (in km/h): ');
+		write('Geschwindigkeit (in km/h): ');
 		readln(input);
-		speed := strtofloat(input);
-		
+		speed := StrToFloat(input);
+
 		totaleDistance := calcKM();
-	
+
 		writeln('Die Distanz zu Hotel ', hotelArray[goal].name , 'betraegt ', totaleDistance, ' km');
-				
-		writeln('Reisezeit: ', calcTravelTime(totaleDistance, speed), ' Minuten');	
-		
-		
+
+		writeln('Reisezeit: ', calcTravelTime(totaleDistance, speed), ' Minuten');
+end;
+
+//Hauptprogramm
+var
+input : String;								//std input string
+begin
+	//Initialisierungen
+	iniAll();
+
+	//Anmeldung
+	login();
+
+	writeln('H = Hotels  R = User registrieren');
+	readln(input);
+
+	if ((input = 'h') or (input = 'H')) then
+	begin
+		reise();
 	end
 	else if ((input = 'r') or (input = 'R')) then
 	begin
 		registUser();
-	end	
-	else if ((input = 'd') or (input = 'D')) then
+	end
+	//under construction
+	else if ((input = 'nh') or (input = 'NH')) then
 	begin
-		
+		registHotel();
 	end
 	else if ((input = 'dau') or (input = 'DAU')) then
 	begin
 		//delAllUsers();
 	end
-	else if ((input = 'du') or (input = 'DU')) then 
-	begin 
+	else if ((input = 'du') or (input = 'DU')) then
+	begin
 		//delAUser();
 	end
 	else if ((input = 'h') or (input = 'help')) then
 	begin
-		
+
 	end;
-	
-	
+
 	exit();
-	
 end.
