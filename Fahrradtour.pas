@@ -16,8 +16,8 @@ type hotel = record
 	distance : integer;	//distance zum nächsten Hotel
 end;
 
-type allUserData = ARRAY [0..99] of user;
-//type allHotelData = ARRAY [0..4] of hotel;
+type HotelFileType = File of Hotel;
+type UserFileType = File of User;
 
 //TODO: Variablen lokalisieren 
 var 
@@ -25,37 +25,83 @@ input : String;								//std input string
 start, goal, totaleDistance : integer;
 errorInput, i, j, userId : integer;
 speed : real;
+userFile : UserFileType;
+hotelFile : HotelFileType;
 
-userAmount : integer;
-
-userList: allUserData;
-file1: FILE OF allUserData;
-
-hotelListe : allHotelData;
-file2 : FILE OF allHotelData;
+userArray : array of user;
+hotelArray : array of hotel;
 
 //inis all vars and loads all data from files
 procedure iniAll();
 begin
 	errorInput := 0;
-	userAmount := 2;
-
-	{$I-}
-	Assign(file1, 'daten.dat');
-	Reset(file1);
-	Read(file1, userList);
-	Close(file1);
-
-	{
-	Assign(file2, 'daten2.dat');
-	Reset(file2);
-	Read(file2, hotelListe);
-	Close(file2);
-	}
-	{$I+}
 	
-	userList[0].name := 'admin';
-	userList[0].password := 'root';
+	Assign(userFile, 'user.dat');
+	Reset(userFile);
+	
+	setLength(userArray, 2);
+
+	userArray[0].name := 'admin';
+	userArray[0].password := 'root';
+	
+	repeat 
+		read(userFile, userArray[Length(userArray) - 1]);
+		setLength(userArray, Length(userArray) + 1);
+	until eof(userFile);
+	
+	close(userFile);
+	
+	Assign(hotelFile, 'hotel.dat');
+	reset(hotelFile);
+	
+	setLength(hotelArray, 1);
+
+	repeat 
+		read(hotelFile, hotelArray[Length(hotelArray) - 1]);
+		setLength(hotelArray, Length(hotelArray) + 1);
+		writeln('got hotel');
+	until eof(hotelFile);
+	
+	close(hotelFile);
+end;
+
+//deactiovated
+procedure create();
+var 
+i : integer;
+begin
+	Assign(userFile, 'user.dat');
+	ReWrite(userFile);
+	
+	setLength(userArray, 2);
+	
+	userArray[0].name := 'admin';
+	userArray[0].password := 'root';
+
+
+	write(userFile, userArray[0]);
+	
+	close(userFile);
+	
+	Assign(hotelFile, 'hotel.dat');
+	ReWrite(hotelFile);
+	
+	setLength(hotelArray, 5);
+	
+	hotelArray[0].name := 'Krone';	
+	hotelArray[0].distance := 11;
+	hotelArray[1].name := 'Adler';	
+	hotelArray[1].distance := 5;
+	hotelArray[2].name := 'Sonne';	
+	hotelArray[2].distance := 11;
+	hotelArray[3].name := 'Central';	
+	hotelArray[3].distance := 5;
+	hotelArray[4].name := 'Hirsch';	
+	hotelArray[4].distance := 0;
+	
+	for i := 0 to 4 do write(hotelFile, hotelArray[i]);
+	
+	close(hotelFile);
 end;
 
 //registes user (would need to be reworked if list would be implimented)
@@ -68,9 +114,10 @@ begin
 	writeln('Benutzerpassword: ');
 	readln(newPassword);
 
-	userAmount := userAmount + 1;
-	userList[userAmount - 1].name := newName;
-	userList[userAmount - 1].password := newPassword;
+	userArray[Length(userArray) - 1].name := newName;
+	userArray[Length(userArray) - 1].password := newPassword;
+	
+	SetLength(userArray, Length(userArray) + 1);
 end;
 
 //not workings (needs list to provide this functionality)
@@ -84,8 +131,8 @@ begin
 	
 	readln(username);
 	
-	for i := 1 to high(userList) do begin 
-		if username = userList[i].name then 
+	for i := 1 to high(userArray) do begin 
+		if username = userArray[i].name then 
 		begin 
 			wasCorrected := true;
 			//userList[i].name := nil;
@@ -101,35 +148,35 @@ end;
 procedure delAllUsers();
 var i : integer;
 begin
-	for i:= 1 to userAmount do
+	for i:= 1 to High(userArray) do
 	begin
-		userList[i].name := '';
-		userList[i].password := '';
+		userArray[i].name := '';
+		userArray[i].password := '';
 	end;
 end;
 
 //closes program and saves all data
 procedure exit();
+var i : integer;
 begin
-	{$I-}
-	Assign(file1, 'daten.dat');
-	ReWrite(file1);
-	Write(file1, userList);
-	Close(file1);
-	{
-	Assign(file2, 'daten2.dat');
-	ReWrite(file2);
-	Write(file2, hotelListe);
-	Close(file2);
-	}
-	{$I+}
+	Assign(userFile, 'user.dat');
+	Rewrite(userFile);
+	
+	for i := low(userArray) + 1 to high(userArray) do write(userFile, userArray[i]);
+	
+	close(userFile);
+	
+	Assign(hotelFile, 'hotel.dat');
+	Rewrite(hotelFile);
+	
+	for i := low(hotelArray) to high(hotelArray) do write(hotelFile, hotelArray[i]);
+	
+	close(hotelFile);
 end;
 
 procedure showhotelListe();
-var 
-	h : hotel;
 begin
-	for i:= low(hotelListe) to high(hotelListe) do write('--', hotelListe[i].name, '--', hotelListe[i].distance, 'km');
+	for i := low(hotelArray) to high(hotelArray) do write('--', hotelArray[i].name, '--', hotelArray[i].distance, 'km');
 	
 	writeln();
 end;
@@ -138,8 +185,9 @@ function calcTravelTime(totaleDistance, speed : real):String;
 var 
 	temp : real;
 begin
+	if (speed <= 0) then speed := 1;
+
 	temp := totaleDistance / speed;	//t = s / v
-	
 	temp := temp * 60;
 	
 	calcTravelTime := FloatToStr(temp);
@@ -164,7 +212,7 @@ begin
 	
 	for j := start to goal - 1 do 
 	begin
-		total := total + hotelListe[j].distance;
+		total := total + hotelArray[j].distance;
 		
 		writeln
 	end;
@@ -183,7 +231,7 @@ begin
 		readln(input);
 		i := 0;
 		repeat 
-			if (userList[i].name = input) then 
+			if (userArray[i].name = input) then 
 			begin
 				login := true;
 				userId := i;
@@ -191,7 +239,7 @@ begin
 			end;
 				
 			i := i+1;
-		until (i > userAmount);
+		until (i >= Length(userArray));
 	until(login);
 	
 	login := false;
@@ -201,7 +249,7 @@ begin
 		write('Password: ');
 		readln(input);
 		
-		if (userList[userId].password = input) then login := true
+		if (userArray[userId].password = input) then login := true
 		else
 		begin
 			writeln('Falsches Password');
@@ -230,7 +278,7 @@ begin
 	
 		for i := 0 to 4 do
 		begin
-			if (hotelListe[i].name = input) then 
+			if (hotelArray[i].name = input) then 
 			begin
 				index := i;
 				correct := true;
@@ -271,11 +319,17 @@ end;
 
 //program startpoint
 begin
+	//create();
+
+	
 	//Initialisierungen
 	iniAll();
 	
+	
 	//Anmeldung
 	login();
+	
+	
 	
 	writeln('H = Hotels  R = User registrieren');
 	readln(input);
@@ -298,7 +352,7 @@ begin
 		
 		totaleDistance := calcKM();
 	
-		writeln('Die Distanz zu Hotel ', hotelListe[goal].name , 'betraegt ', totaleDistance, ' km');
+		writeln('Die Distanz zu Hotel ', hotelArray[goal].name , 'betraegt ', totaleDistance, ' km');
 				
 		writeln('Reisezeit: ', calcTravelTime(totaleDistance, speed), ' Minuten');	
 		
@@ -324,6 +378,7 @@ begin
 	begin
 		
 	end;
+	
 	
 	exit();
 	
