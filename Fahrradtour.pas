@@ -13,7 +13,7 @@ end;
 type hotel = record
 	name : string;			
 	id : integer;
-	distance : integer;		//distance zum nächsten Hotel
+	distance : integer;		//Distanz zum nächsten Hotel
 end;
 
 type HotelFileType = File of Hotel;
@@ -60,6 +60,8 @@ begin
 		read(hotelFile, hotelArray[Length(hotelArray) - 1]);
 		setLength(hotelArray, Length(hotelArray) + 1);
 	end;
+
+	setLength(hotelArray, Length(hotelArray) - 1);
 
 	close(hotelFile);
 end;
@@ -193,7 +195,6 @@ begin
 		repeat
 			if (userArray[i].name = input) then
 			begin
-				writeln('Brack at index: ' , i);
 				login := true;
 				userId := i;
 				break;
@@ -239,7 +240,7 @@ begin
 	repeat
 		readln(input);
 
-		for i := 0 to 4 do
+		for i := low(hotelArray) to high(hotelArray) do
 		begin
 			if (hotelArray[i].name = input) then
 			begin
