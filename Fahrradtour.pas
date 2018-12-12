@@ -213,10 +213,10 @@ begin
 		login();
 
 		repeat
-			writeln('(H)otels (U)ser registrieren (A)usloggen (E)xit:');
+			writeln('(T)our (U)ser registrieren (A)usloggen (E)xit:');
 			readln(input);
 
-			if ((input = 'h') or (input = 'H')) then reise()
+			if ((input = 't') or (input = 'T')) then reise()
 			else if ((input = 'u') or (input = 'U')) then registUser()
 		until (input = 'e') or (input = 'E') or (input = 'a') or (input = 'A');
 	until (input = 'e') or (input = 'E');
