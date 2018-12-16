@@ -1,7 +1,7 @@
 Program Fahrradtour;
 {$R+} {$Q+} {$I+}
 
-uses sysutils, crt, HotelUnit in 'lib/HotelUnit.pas', UserUnit in 'lib/userUnit.pas' ;
+uses sysutils, crt, HotelUnit in 'lib/HotelUnit.pas', UserUnit in 'lib/userUnit.pas' , DrawUnit in 'lib/DrawUnit.pas';
 
 var
 userArray : array of user;
@@ -174,7 +174,7 @@ begin
 
 end;
 
-procedure reise();
+procedure tour();
 var
 	totaleDistance, start, goal : integer;
 	speed : real;
@@ -207,16 +207,19 @@ input : String;								//std input string
 begin
 	//Initialisierungen
 	loadFiles();
+	drawPath(hotelArray, 0, 3);
 
 	repeat
 		//Anmeldung
+		//drawHotel(hotelArray[0], 100, 400);
 		login();
+
 
 		repeat
 			writeln('(T)our (U)ser registrieren (A)usloggen (E)xit:');
 			readln(input);
 
-			if ((input = 't') or (input = 'T')) then reise()
+			if ((input = 't') or (input = 'T')) then tour()
 			else if ((input = 'u') or (input = 'U')) then registUser()
 		until (input = 'e') or (input = 'E') or (input = 'a') or (input = 'A');
 	until (input = 'e') or (input = 'E');
